@@ -29,7 +29,7 @@ class CategoryController extends Controller{
         $next_page = $page < $last_page ? $page + 1 : $last_page;
         $category->setActiveJobs($em->getRepository('IbwJobeetBundle:Job')->getActiveJobs($category->getId(), $jobs_per_page, ($page - 1) * $jobs_per_page));
 
-        var_dump($last_page);die;
+        //var_dump($last_page);die;
        // $category->setActiveJobs($em->getRepository('IbwJobeetBundle:Job')->getActiveJobs($category->getId()));
 
         return $this->render('IbwJobeetBundle:Category:show.html.twig', array(
