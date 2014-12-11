@@ -80,6 +80,8 @@ class Job
      */
     private $expires_at;
 
+
+
     /**
      * @var \DateTime
      */
@@ -390,10 +392,11 @@ class Job
      */
     public function setExpiresAt($expiresAt)
     {
-        $this->setExpiresAt($expiresAt);
+        $this->expires_at = ($expiresAt);
 
         return $this;
     }
+
 
     /**
      * Get expires_at

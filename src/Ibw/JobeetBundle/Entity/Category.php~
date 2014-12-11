@@ -3,6 +3,7 @@
 namespace Ibw\JobeetBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Ibw\JobeetBundle\Utils\Jobeet as Jobeet;
 
 /**
  * Category
@@ -10,6 +11,16 @@ use Doctrine\ORM\Mapping as ORM;
 class Category
 
 {
+
+
+    private $more_jobs;
+
+
+
+
+    /**
+     * @var boolean
+     * */
     private $active_jobs;
 
 
@@ -42,6 +53,27 @@ class Category
         $this->jobs = new \Doctrine\Common\Collections\ArrayCollection();
         $this->affiliates = new \Doctrine\Common\Collections\ArrayCollection();
     }
+
+
+    /**
+     * @param mixed $more_jobs
+     */
+    public function setMoreJobs($more_jobs)
+    {
+        $this->more_jobs = $more_jobs >=  0 ? $more_jobs : 0;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMoreJobs()
+    {
+        return $this->more_jobs;
+    }
+
+
+
+
     /**
      * @param mixed $active_jobs
      */
@@ -160,5 +192,7 @@ class Category
     public function __toString(){
         return $this->getName()? $this->getName():'';
     }
+
+
 
 }
