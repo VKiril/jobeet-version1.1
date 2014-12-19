@@ -11,25 +11,40 @@ use Doctrine\ORM\EntityRepository;
  * repository methods below.
  */
 class JobRepository extends EntityRepository{
-    public function getActiveJobs($category_id = null, $max = null, $offset = null ){
+
+    public function getActiveJobs ($category_id = null, $max = null, $offset = null, $affiliate_id = null)
+    {
         $qb = $this->createQueryBuilder('j')
             ->where('j.expires_at > :date')
-            ->setParameter('date',date('Y-m-d H:i:s', time()))
-            ->orderBy('j.expires_at','DESC');
-        if($max){
+            ->setParameter('date', date('Y-m-d H:i:s', time()))
+            ->andWhere('j.is_activated = :activated')
+            ->setParameter('activated', 1)
+            ->orderBy('j.expires_at', 'DESC');
+
+        if($max) {
             $qb->setMaxResults($max);
         }
-        if($offset)
-        {
+
+        if($offset) {
             $qb->setFirstResult($offset);
         }
 
-        if($category_id){
-            $qb->andWhere('j.category =:category_id')
-                ->setParameter('category_id',$category_id);
+        if($category_id) {
+            $qb->andWhere('j.category = :category_id')
+                ->setParameter('category_id', $category_id);
         }
-        $query = $qb->getQuery()->getResult();
-        return $query;
+        // j.category c, c.affiliate a
+        if($affiliate_id) {
+            $qb->leftJoin('j.category', 'c')
+                ->leftJoin('c.affiliates', 'a')
+                ->andWhere('a.id = :affiliate_id')
+                ->setParameter('affiliate_id', $affiliate_id)
+            ;
+        }
+
+        $query = $qb->getQuery();
+
+        return $query->getResult();
     }
 
     public function getActiveJob($id)
@@ -39,6 +54,8 @@ class JobRepository extends EntityRepository{
             ->setParameter('id', $id)
             ->andWhere('j.expires_at > :date')
             ->setParameter('date', date('Y-m-d H:i:s', time()))
+            ->andWhere('j.is_activated = :activated')
+            ->setParameter('activated', 1)
             ->setMaxResults(1)
             ->getQuery();
 
@@ -56,7 +73,9 @@ class JobRepository extends EntityRepository{
         $qb = $this->createQueryBuilder('j')
             ->select('count(j.id)')
             ->where('j.expires_at > :date')
-            ->setParameter('date', date('Y-m-d H:i:s', time()));
+            ->setParameter('date', date('Y-m-d H:i:s', time()))
+            ->andWhere('j.is_activated = :activated')
+            ->setParameter('activated', 1);
 
         if($category_id)
         {
@@ -69,6 +88,41 @@ class JobRepository extends EntityRepository{
         return $query->getSingleScalarResult();
     }
 
+    public function cleanup($days)
+    {
+        $query = $this->createQueryBuilder('j')
+            ->delete()
+            ->where('j.is_activated IS NULL')
+            ->andWhere('j.created_at < :created_at')
+            ->setParameter('created_at',  date('Y-m-d', time() - 86400 * $days))
+            ->getQuery();
+
+        return $query->execute();
+    }
+
+    public function getLatestPost($category_id = null)
+    {
+        $query = $this->createQueryBuilder('j')
+            ->where('j.expires_at > :date')
+            ->setParameter('date', date('Y-m-d H:i:s', time()))
+            ->andWhere('j.is_activated = :activated')
+            ->setParameter('activated', 1)
+            ->orderBy('j.expires_at', 'DESC')
+            ->setMaxResults(1);
+
+        if($category_id) {
+            $query->andWhere('j.category = :category_id')
+                ->setParameter('category_id', $category_id);
+        }
+
+        try{
+            $job = $query->getQuery()->getSingleResult();
+        } catch(\Doctrine\Orm\NoResultException $e){
+            $job = null;
+        }
+
+        return $job;
+    }
 
 
 

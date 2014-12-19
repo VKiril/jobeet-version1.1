@@ -15,3 +15,29 @@ IbwJobeetBundle_job:
 IbwJobeetBundle_category:
         pattern: /category/{slug}/{page}
         defaults: { _controller: IbwJobeetBundle:Category:show, page: 1 }
+
+ibw_job_publish:
+    pattern:  /{token}/publish
+    defaults: { _controller: "IbwJobeetBundle:Job:publish" }
+    requirements: { _method: post }
+
+login:
+    pattern:   /login
+    defaults:  { _controller: IbwJobeetBundle:Default:login }
+
+login_check:
+    pattern:   /login_check
+
+logout:
+    pattern:   /logout
+
+IbwJobeetBundle_api:
+    pattern: /api/{token}/jobs.{_format}
+    defaults: {_controller: "IbwJobeetBundle:Api:list"}
+    requirements:
+        _format: xml|json|yaml
+
+IbwJobeetBundle_ibw_affiliate:
+    resource: "@IbwJobeetBundle/Resources/config/routing/affiliate.yml"
+    prefix:   /affiliate
+
